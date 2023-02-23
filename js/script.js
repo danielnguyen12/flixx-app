@@ -31,7 +31,7 @@ const fetchAPIData = async (endpoint) => {
 const searchAPIData = async () => {
   showSpinner();
 
-  const response = await fetch(`${global.api.apiUrl}search/${global.search.type}?api_key=${global.api.apiKey}&language=en-US&query=${global.search.term}`);
+  const response = await fetch(`${global.api.apiUrl}search/${global.search.type}?api_key=${global.api.apiKey}&language=en-US&query=${global.search.term}&page=${global.search.page}`);
 
   const data = await response.json();
 
@@ -297,7 +297,7 @@ async function search() {
 }
 
 function displaySearchResults(results) {
-  results.forEach((result) => {
+    results.forEach((result) => {
     const div = document.createElement('div');
     div.classList.add('card');
     div.innerHTML = `
@@ -314,10 +314,27 @@ function displaySearchResults(results) {
     `;
 
     document.querySelector('#search-results-heading').innerHTML = `
-      <h2>${results.length} of ${global.search.totalResults} results for ${global.search.term}</h2>
+      <h2>Results for search: "${global.search.term}"</h2>
     `;
 
     document.querySelector('#search-results').appendChild(div);
+  });
+
+  document.querySelector('.pagination').innerHTML = `
+    <button class="btn btn-primary" id="showMore">Show more results</button>
+  `;
+  showMoreResults();
+}
+
+function showMoreResults() {
+if (global.search.page === global.search.totalPages) {
+    document.querySelector('#showMore').disabled = true;
+  }
+
+  document.querySelector('#showMore').addEventListener('click', async () => {
+    global.search.page += 1;
+    const { results, total_pages } = await searchAPIData();
+    displaySearchResults(results);
   });
 }
 
