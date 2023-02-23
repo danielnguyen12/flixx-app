@@ -1,10 +1,12 @@
+/* eslint-disable camelcase */
 const global = {
   currentPage: window.location.pathname,
   search: {
     term: '',
     type: '',
     page: 1,
-    totalPages: 1
+    totalPages: 1,
+    totalResults: 0
   },
   api: {
     apiKey:'26f969320ef95a0822db299f3d7c1b36',
@@ -274,7 +276,11 @@ async function search() {
   global.search.term = urlParams.get('search-term');
 
   if (global.search.term !== '' && global.search.term !== null) {
-    const { results, totalPages, page } = await searchAPIData();
+    const { results, total_pages, page, total_results } = await searchAPIData();
+
+    global.search.page = page;
+    global.search.totalPages = total_pages;
+    global.search.totalResults = total_results;
 
     if (results.length === 0) {
       showAlert('No results found in the database.');
@@ -306,6 +312,11 @@ function displaySearchResults(results) {
         <h5 class="card-title">${global.search.type === 'movie' ? result.title : result.name}</h5>
       </div>
     `;
+
+    document.querySelector('#search-results-heading').innerHTML = `
+      <h2>${results.length} of ${global.search.totalResults} results for ${global.search.term}</h2>
+    `;
+
     document.querySelector('#search-results').appendChild(div);
   });
 }
